@@ -1,7 +1,7 @@
 import { JSX } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../style/ui/card";
 import { Button } from "../../style/ui/button";
-import { Calendar, Clock, Edit, Trash2, User } from "lucide-react";
+import { Calendar, Edit, Trash2, User } from "lucide-react";
 import { ImageWithFallback } from "../../style/figma/ImageWithFallback";
 import { Badge } from "../../style/ui/badge";
 

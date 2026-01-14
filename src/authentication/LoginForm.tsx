@@ -9,8 +9,6 @@ import { AppDispatch } from "../app/store";
 import { RootState } from "../app/types";
 import { clearError, setError, setLoading } from "./authSlice";
 import { supabase } from "../supabase-client";
-import { set } from "react-hook-form";
-import { on } from "events";
 
 interface LoginFormProps {
   onSuccess: () => void;

@@ -1,6 +1,6 @@
 import { JSX, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User } from "lucide-react";
 import { Button } from "../style/ui/button";
 import { Input } from "../style/ui/input";
 import { Label } from "../style/ui/label";

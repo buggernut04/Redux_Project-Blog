@@ -35,7 +35,7 @@ export default function BlogPage(): JSX.Element {
     const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
     const [authorName, setAuthorName] = useState<string>('');
 
-    const POSTS_PER_PAGE = 2;
+    const POSTS_PER_PAGE = 3;
 
     // 2. Create an async function to fetch the data
     const fetchUserName = async () => {

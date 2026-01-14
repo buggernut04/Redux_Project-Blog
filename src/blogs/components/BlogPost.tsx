@@ -1,7 +1,7 @@
 import { JSX } from "react";
 import { ImageWithFallback } from "../../style/figma/ImageWithFallback";
 import { Button } from "../../style/ui/button";
-import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
+import { ArrowLeft, Calendar, User } from "lucide-react";
 import { Badge } from "../../style/ui/badge";
 import { Separator } from "../../style/ui/separator";
 

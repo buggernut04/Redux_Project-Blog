@@ -9,7 +9,6 @@ import { Label } from "../../style/ui/label";
 import { Input } from "../../style/ui/input";
 import { RadioGroup, RadioGroupItem } from "../../style/ui/radio-group";
 import { supabase } from "../../supabase-client";
-import { set } from "react-hook-form";
 
 export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit = false }: {
   onSubmit: (blog: {

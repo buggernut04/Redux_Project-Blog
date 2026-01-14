@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux"
 import { supabase } from "./supabase-client";
 import { setUser } from "./authentication/authSlice";
 import type { Session } from '@supabase/supabase-js';
-import { toast } from "sonner";
 import { Toaster } from "./style/ui/sonner";
 import { LoginForm } from "./authentication/LoginForm";
 import BlogPage from "./blogs/BlogPage";
@@ -13,7 +12,7 @@ import { SignUpForm } from "./authentication/RegisterForm";
 
 export default function App(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, loading } = useSelector((state: RootState) => state.auth);
+  const { loading } = useSelector((state: RootState) => state.auth);
   const [ isAuthenticated, setIsAuthenticated ] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'blogpage'>('login');
 
