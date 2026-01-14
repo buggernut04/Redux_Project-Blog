@@ -33,8 +33,31 @@ export default function BlogPage(): JSX.Element {
     const [view, setView] = useState<'list' | 'detail' | 'create' | 'edit'>('list');
     const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
     const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+    const [authorName, setAuthorName] = useState<string>('');
 
     const POSTS_PER_PAGE = 2;
+
+    // 2. Create an async function to fetch the data
+    const fetchUserName = async () => {
+      try {
+       
+        const { data, error } = await supabase
+          .from('user')         
+          .select('name')        
+          .eq('user_id', user?.id) 
+          .single();             
+
+        if (error) throw error;
+
+        // 3. Update state with the fetched name
+        if (data) {
+            setAuthorName(data.name);
+        }
+      } catch (err) {
+        console.log("Error adding task: ", err);
+      } 
+    };
+
 
     const fetchBlogs = async (): Promise<void> => {
         try {
@@ -65,6 +88,7 @@ export default function BlogPage(): JSX.Element {
     useEffect(() => {
         if (user) {
             fetchBlogs();
+            fetchUserName();
         }
     }, [user]);
 
@@ -84,7 +108,7 @@ export default function BlogPage(): JSX.Element {
             .insert([
             {   
                 ...blogData,
-                author: user?.email?.split('@')[0] || 'Anonymous',
+                author: authorName,
                 date: new Date(),
                 author_id: user?.id,
             },
@@ -131,7 +155,7 @@ export default function BlogPage(): JSX.Element {
                     category: blogData.category,
                     tags: blogData.tags,
                     image: blogData.image,
-                    author: user?.email?.split('@')[0] || 'Anonymous',
+                    author: { authorName },
                     date: new Date(),
                     author_id: user?.id,
                 })
