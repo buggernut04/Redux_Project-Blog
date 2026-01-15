@@ -41,6 +41,8 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  
+
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);
@@ -85,19 +87,6 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
     e.preventDefault();
     setIsLoading(true);
     let finalImage = image;
-    
-    // Validate image is provided
-    if (imageInputMode === 'url' && !image.trim()) {
-      alert('Please provide an image URL');
-      setIsLoading(false);
-      return;
-    }
-    
-    if (imageInputMode === 'upload' && !uploadedFile && !image) {
-      alert('Please select an image file to upload');
-      setIsLoading(false);
-      return;
-    }
 
     // Upload the file if in upload mode
     if (imageInputMode === 'upload' && uploadedFile) {
@@ -110,6 +99,11 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
       }
 
       finalImage = uploadedUrl;
+    }
+
+    if(image === null || uploadedFile === null){
+      // Default image if no image added
+      finalImage = "https://www.brightvessel.com/wp-content/uploads/2024/03/how-to-set-default-blog-page.jpg";
     }
 
     onSubmit({ title, excerpt, content, category, tags, image: finalImage });
@@ -186,7 +180,7 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Image *</Label>
+                  <Label>Image (Optional)</Label>
                   <RadioGroup
                     value={imageInputMode}
                     onValueChange={(value) => setImageInputMode(value as 'url' | 'upload')}
@@ -213,10 +207,9 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                         id="image-url"
                         type="url"
                         placeholder="https://example.com/image.jpg"
-                        value={ image }
+                        value={ image === null ? '' : image }
                         onChange={(e) => setImage(e.target.value)}
                         className="pl-10"
-                        required={imageInputMode === 'url'}
                       />
                     </div>
                   ) : (
@@ -227,7 +220,6 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                         accept="image/*"
                         onChange={handleFileChange}
                         className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                        required={imageInputMode === 'upload' && !image}
                       />
                       {uploadedFile && (
                         <p className="text-sm text-muted-foreground mt-1">
