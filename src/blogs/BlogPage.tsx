@@ -155,7 +155,7 @@ export default function BlogPage(): JSX.Element {
                     category: blogData.category,
                     tags: blogData.tags,
                     image: blogData.image,
-                    author: { authorName },
+                    author: authorName,
                     date: new Date(),
                     author_id: user?.id,
                 })
@@ -193,7 +193,6 @@ export default function BlogPage(): JSX.Element {
             
             // Adjust current page if it exceeds total pages after deletion
             const newTotalPages = (blogs.length - 1) / POSTS_PER_PAGE;
-            console.log('New total pages after deletion:', newTotalPages);
 
             if (currentPage > newTotalPages && newTotalPages > 0) {
                 dispatch(setCurrentPage(newTotalPages));
@@ -245,6 +244,9 @@ export default function BlogPage(): JSX.Element {
     }
 
     if (view === 'edit' && editingBlog) {
+        // Automatically be deleted in the input box if this is the image URL
+        let defaultImgURL = "https://www.brightvessel.com/wp-content/uploads/2024/03/how-to-set-default-blog-page.jpg";
+
         return (
             <>
                 <CreateBlogForm
@@ -259,7 +261,7 @@ export default function BlogPage(): JSX.Element {
                         content: editingBlog.content,
                         category: editingBlog.category,
                         tags: editingBlog.tags,
-                        image: editingBlog.image,
+                        image: editingBlog.image === defaultImgURL ? '' : editingBlog.image,
                     }}
                     isEdit
                 />
