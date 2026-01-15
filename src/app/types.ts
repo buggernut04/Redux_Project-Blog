@@ -20,8 +20,19 @@ export interface Blog {
   tags: string[];
 }
 
+export interface Comment {
+  id: string;
+  user_id: string;
+  post_id: string;
+  author: string;
+  content: string;
+  image?: string;
+  date: Date;
+}
+
 export interface BlogState {
   blogs: Blog[];
+  comments: Comment[];
   selectedBlog: Blog | null;
   loading: boolean;
   error: string | null;

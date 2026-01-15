@@ -8,21 +8,25 @@ import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import BlogHeader from "./components/BlogHeader";
 import BlogPost from "./components/BlogPost";
-import { addBlog, setBlogError, setCurrentPage, setSearchQuery, setSelectedBlog, setSelectedCategory, updateBlog } from "./blogSlice";
+import { addBlog, addComment, deleteComment, setBlogError, setCurrentPage, setSearchQuery, setSelectedBlog, setSelectedCategory, updateBlog } from "./blogSlice";
 import { deleteBlog, setBlogs, setBlogLoading } from "./blogSlice";
-import { Blog } from "../app/types";
+import { Blog, Comment } from "../app/types";
 import CreateBlogForm from "./components/CreateBlogForm";
 import { Toaster } from "../style/ui/sonner";
 import CategoryFilter from "./components/CategoryFilter";
 import Pagination from "./components/Pagination";
 import BlogCard from "./components/BlogCard";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
+import CommentSection from "./components/CommentSection";
+
+import { setComments } from "./blogSlice";
 
 export default function BlogPage(): JSX.Element {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
     const { 
         blogs, 
+        comments,
         selectedBlog,
         loading: blogLoading,
         searchQuery,
@@ -33,32 +37,10 @@ export default function BlogPage(): JSX.Element {
     const [view, setView] = useState<'list' | 'detail' | 'create' | 'edit'>('list');
     const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
     const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
-    const [authorName, setAuthorName] = useState<string>('');
 
     const POSTS_PER_PAGE = 3;
 
-    // 2. Create an async function to fetch the data
-    const fetchUserName = async () => {
-      try {
-       
-        const { data, error } = await supabase
-          .from('user')         
-          .select('name')        
-          .eq('user_id', user?.id) 
-          .single();             
-
-        if (error) throw error;
-
-        // 3. Update state with the fetched name
-        if (data) {
-            setAuthorName(data.name);
-        }
-      } catch (err) {
-        console.log("Error adding task: ", err);
-      } 
-    };
-
-
+    // All Functions for Blog CRUD Operations
     const fetchBlogs = async (): Promise<void> => {
         try {
             dispatch(setBlogLoading(true));
@@ -85,13 +67,6 @@ export default function BlogPage(): JSX.Element {
         }
     };
 
-    useEffect(() => {
-        if (user) {
-            fetchBlogs();
-            fetchUserName();
-        }
-    }, [user]);
-
     const handleCreateBlog = async (blogData: {
         title: string;
         excerpt: string;
@@ -108,7 +83,7 @@ export default function BlogPage(): JSX.Element {
             .insert([
             {   
                 ...blogData,
-                author: authorName,
+                author: user?.user_metadata.name,
                 date: new Date(),
                 author_id: user?.id,
             },
@@ -139,7 +114,7 @@ export default function BlogPage(): JSX.Element {
         content: string;
         category: string;
         tags: string[];
-        image: string | File;
+        image: string;
     }): Promise<void> => {
         if (!editingBlog) return;
 
@@ -155,7 +130,7 @@ export default function BlogPage(): JSX.Element {
                     category: blogData.category,
                     tags: blogData.tags,
                     image: blogData.image,
-                    author: authorName,
+                    author: user?.user_metadata.name,
                     date: new Date(),
                     author_id: user?.id,
                 })
@@ -203,17 +178,6 @@ export default function BlogPage(): JSX.Element {
         }
     };
 
-    const handleLogout = async (): Promise<void> => {
-        try {
-            await supabase.auth.signOut();
-            dispatch(logout());
-            //dispatch(clearBlogs());
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Logout failed';
-            dispatch(setError(errorMessage));
-        }
-    };
-
     // Filter and paginate blogs
     const categories = Array.from(new Set(blogs.map((blog: Blog) => blog.category)));
     
@@ -231,6 +195,98 @@ export default function BlogPage(): JSX.Element {
         (currentPage - 1) * POSTS_PER_PAGE,
         currentPage * POSTS_PER_PAGE
     );
+
+    useEffect(() => {
+        if (user) {
+            fetchBlogs();
+        }
+    }, [user]);
+
+    // All Funtions for Comment Operations would go here
+    const fetchComments = async (postId: string): Promise<void> => {
+        try {
+            const { data, error } = await supabase
+                .from('comments')
+                .select('*')
+                .eq('post_id', postId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const formattedComments: Comment[] = (data || []).map(comment => ({
+                ...comment,
+                date: new Date(comment.created_at),
+            }));
+
+            dispatch(setComments(formattedComments));
+        } catch (err) {
+            console.error('Failed to fetch comments:', err);
+        }
+    };
+
+    const handleAddComment = async (postId: string, content: string, image?: string | null): Promise<void> => {
+        try {
+        const { data, error } = await supabase
+            .from('comments')
+            .insert([
+            {
+                user_id: user?.id,
+                post_id: postId,
+                content: content,
+                image: image || null,
+                author: user?.user_metadata.name,
+                date: new Date(),
+            },
+            ])
+            .select()
+            .single();
+
+            if (error) throw error;
+
+            const formattedComment: Comment = {
+                    ...data,
+                    date: new Date(data.created_at),
+            };
+
+            dispatch(addComment(formattedComment));
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to add comment';
+            dispatch(setBlogError(errorMessage));
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string): Promise<void> => {
+        try {
+            const { error } = await supabase
+                .from('comments')
+                .delete()
+                .eq('id', commentId);
+
+            if (error) throw error;
+
+            dispatch(deleteComment(commentId));
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to delete comment';
+            dispatch(setBlogError(errorMessage));
+        }
+    };
+
+    useEffect(() => {
+        if (selectedBlog) {
+            fetchComments(selectedBlog.id);
+        }
+    }, [selectedBlog]);
+
+    const handleLogout = async (): Promise<void> => {
+        try {
+            await supabase.auth.signOut();
+            dispatch(logout());
+            //dispatch(clearBlogs());
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Logout failed';
+            dispatch(setError(errorMessage));
+        }
+    };
 
     // Render different views based on state
     if (view === 'create') {
@@ -293,6 +349,22 @@ export default function BlogPage(): JSX.Element {
                                 dispatch(setSelectedBlog(null));
                                 setView('list');
                             }}
+                        />
+
+                        <CommentSection
+                            postId={selectedBlog.id}
+                            comments={comments.map(c => ({
+                                id: c.id,
+                                user_id: c.user_id,
+                                post_id: c.post_id,
+                                author: c.author,
+                                content: c.content,
+                                image: c.image,
+                                date: c.date,
+                            }))}
+                            currentUserId={user?.id}
+                            onAddComment={(content, image) => handleAddComment(selectedBlog.id, content, image)}
+                            onDeleteComment={handleDeleteComment}
                         />
                     </div>
                 </div>

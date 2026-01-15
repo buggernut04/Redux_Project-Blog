@@ -41,8 +41,6 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  
-
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);

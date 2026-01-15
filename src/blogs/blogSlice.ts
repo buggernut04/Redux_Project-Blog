@@ -2,11 +2,13 @@ import { createSlice } from "@reduxjs/toolkit";
 import { BlogState } from "../app/types";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { Blog } from "../app/types";
+import { Comment } from "../app/types";
 
 const blogSlice = createSlice ({
     name: 'blogs',
     initialState: {
         blogs: [],
+        comments: [],
         selectedBlog: null,
         loading: false,
         error: null,
@@ -42,12 +44,22 @@ const blogSlice = createSlice ({
                 state.selectedBlog = null;
             }
         },
+        setComments: (state, action: PayloadAction<Comment[]>) => {
+            state.comments = action.payload;
+        },
+        addComment: (state, action: PayloadAction<Comment>) => {
+            state.comments.unshift(action.payload);
+        },
+        deleteComment: (state, action: PayloadAction<string>) => {
+            state.comments = state.comments.filter(comment => comment.id !== action.payload);
+        },
         setSearchQuery: (state, action: PayloadAction<string>) => {
             state.searchQuery = action.payload;
             state.currentPage = 1;
         },
         setSelectedCategory: (state, action: PayloadAction<string>) => {
             state.selectedCategory = action.payload;
+            state.currentPage = 1;
         },
         setCurrentPage: (state, action: PayloadAction<number>) => {
             state.currentPage = action.payload;
@@ -55,7 +67,7 @@ const blogSlice = createSlice ({
         setBlogLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload;
         },
-        setBlogError: (state, action: PayloadAction<string | null>) => {
+        setBlogError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
             state.loading = false;
         },
@@ -65,12 +77,12 @@ const blogSlice = createSlice ({
         clearBlogs: (state) => {
             state.blogs = [];
             state.selectedBlog = null;
-            state.loading = false;
+            state.comments = [];
             state.error = null;
             state.searchQuery = '';
             state.selectedCategory = 'All';
             state.currentPage = 1;
-        }
+        },
     }
 });
 
@@ -80,13 +92,16 @@ export const {
     addBlog,
     updateBlog,
     deleteBlog,
+    setComments,
+    addComment,
+    deleteComment,
     setSearchQuery,
     setSelectedCategory,
     setCurrentPage,
     setBlogLoading,
     setBlogError,
     clearBlogError,
-    clearBlogs
+    clearBlogs,
 } = blogSlice.actions;
 
 export const blogReducer = blogSlice.reducer;

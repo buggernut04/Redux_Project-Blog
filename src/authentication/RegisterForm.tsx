@@ -45,6 +45,11 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: RegisterFormProps): J
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    data: {
+                        name: name,
+                    },
+                },
             });
             if (error) throw error;
 
@@ -53,20 +58,6 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: RegisterFormProps): J
             }
             
             if (data.user) {
-              // Insert into the 'users' table
-              const { error: insertError } = await supabase
-                .from('user')
-                .insert({
-                  user_id: data.user.id, 
-                  name,
-                  email,
-                });
-
-              if (insertError) {
-                console.error('Error inserting user data:', insertError);
-                // Optionally, you could delete the auth user if insert fails, but for now, just log
-              }
-                
               onSuccess();
             }
 

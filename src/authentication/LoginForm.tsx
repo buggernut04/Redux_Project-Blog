@@ -38,7 +38,6 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps): JSX.
         throw error;
       }
       if (data.user) {
-        console.log("Login successful:", data.user);
         onSuccess();
       }
 
