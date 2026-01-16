@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../style/ui/card";
 import { Textarea } from "../../style/ui/textarea";
 import { Label } from "../../style/ui/label";
 import { Input } from "../../style/ui/input";
-import { RadioGroup, RadioGroupItem } from "../../style/ui/radio-group";
 import { supabase } from "../../supabase-client";
 
 export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit = false }: {
@@ -37,7 +36,6 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
   const [image, setImage] = useState(initialData?.image || '');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
-  const [imageInputMode, setImageInputMode] = useState<'url' | 'upload'>(initialData?.image ? 'url' : 'url');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,6 +48,7 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
+            setImage(e.target.value);
             setUploadedFile(e.target.files?.[0]);
         }
   };
@@ -86,8 +85,7 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
     setIsLoading(true);
     let finalImage = image;
 
-    // Upload the file if in upload mode
-    if (imageInputMode === 'upload' && uploadedFile) {
+    if (uploadedFile) {
       const uploadedUrl = await uploadImage(uploadedFile);
 
       if (!uploadedUrl) {
@@ -178,39 +176,10 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Image (Optional)</Label>
-                  <RadioGroup
-                    value={imageInputMode}
-                    onValueChange={(value) => setImageInputMode(value as 'url' | 'upload')}
-                    className="flex flex-row space-x-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="url" id="url" />
-                      <Label htmlFor="url" className="text-sm font-normal cursor-pointer">
-                        URL
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="upload" id="upload" />
-                      <Label htmlFor="upload" className="text-sm font-normal cursor-pointer">
-                        Upload File
-                      </Label>
-                    </div>
-                  </RadioGroup>
-
-                  {imageInputMode === 'url' ? (
-                    <div className="relative">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                      <Input
-                        id="image-url"
-                        type="url"
-                        placeholder="https://example.com/image.jpg"
-                        value={ image === null ? '' : image }
-                        onChange={(e) => setImage(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  ) : (
+                  <Label>
+                    <ImageIcon className="flex items-center space-x-2" /> 
+                    Image (Optional)
+                  </Label>
                     <div className="relative">
                       <Input
                         id="image-file"
@@ -225,7 +194,7 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                         </p>
                       )}
                     </div>
-                  )}
+
                 </div>
               </div>
 
@@ -264,22 +233,6 @@ export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit
                   </div>
                 )}
               </div>
-
-              { (image || uploadedFile) && (
-                <div className="space-y-2">
-                  <Label>Image Preview</Label>
-                  <div className="aspect-video overflow-hidden rounded-lg border">
-                    <img
-                      src={image || (uploadedFile ? URL.createObjectURL(uploadedFile) : '')}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/1200x600?text=Invalid+Image+URL";
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
 
 
               <div className="flex gap-4 pt-4">

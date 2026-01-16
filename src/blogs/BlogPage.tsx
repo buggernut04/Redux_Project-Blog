@@ -166,11 +166,17 @@ export default function BlogPage(): JSX.Element {
             if (error) throw error;
             dispatch(deleteBlog(blogId));
             
-            // Adjust current page if it exceeds total pages after deletion
-            const newTotalPages = (blogs.length - 1) / POSTS_PER_PAGE;
-
+            // Calculate based on filtered blogs after deletion
+            const remainingBlogs = filteredBlogs.filter(blog => blog.id !== blogId).length;
+            const newTotalPages = Math.ceil(remainingBlogs / POSTS_PER_PAGE);
+            
+            // If current page exceeds new total pages, go to last page
             if (currentPage > newTotalPages && newTotalPages > 0) {
                 dispatch(setCurrentPage(newTotalPages));
+            }
+            // If on page 1 and no blogs left, stay on page 1
+            else if (remainingBlogs === 0) {
+                dispatch(setCurrentPage(1));
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to delete blog';
@@ -256,34 +262,32 @@ export default function BlogPage(): JSX.Element {
     };
 
     const handleEditComment = async (commentId: string, content: string, image?: string | null): Promise<void> => {
-    try {
-        const { data, error } = await supabase
-        .from('comments')
-        .update({
-            user_id: user?.id,
-            post_id: selectedBlog?.id,
-            content,
-            image: image || null,
-        })
-        .eq('id', commentId)
-        .select()
-        .single();
+        try {
+            const { data, error } = await supabase
+            .from('comments')
+            .update({
+                user_id: user?.id,
+                post_id: selectedBlog?.id,
+                content,
+                image: image || null,
+            })
+            .eq('id', commentId)
+            .select()
+            .single();
 
-        if (error) throw error;
+            if (error) throw error;
 
-        const formattedComment: Comment = {
-            ...data,
-            date: new Date(data.created_at),
-        };
+            const formattedComment: Comment = {
+                ...data,
+                date: new Date(data.created_at),
+            };
 
-        dispatch(updateComment(formattedComment)); // You'll need to add this action
-        // toast.success("Comment updated!"); // If using toast
-        
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to update comment';
-        dispatch(setBlogError(errorMessage));
-        // toast.error("Failed to update comment"); // If using toast
-    }
+            dispatch(updateComment(formattedComment)); 
+            
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update comment';
+            dispatch(setBlogError(errorMessage));
+        }
     };
 
     const handleDeleteComment = async (commentId: string): Promise<void> => {
