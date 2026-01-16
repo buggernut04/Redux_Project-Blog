@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import BlogHeader from "./components/BlogHeader";
 import BlogPost from "./components/BlogPost";
-import { addBlog, addComment, deleteComment, setBlogError, setCurrentPage, setSearchQuery, setSelectedBlog, setSelectedCategory, updateBlog } from "./blogSlice";
+import { addBlog, addComment, deleteComment, setBlogError, setCurrentPage, setSearchQuery, setSelectedBlog, setSelectedCategory, updateBlog, updateComment } from "./blogSlice";
 import { deleteBlog, setBlogs, setBlogLoading } from "./blogSlice";
 import { Blog, Comment } from "../app/types";
 import CreateBlogForm from "./components/CreateBlogForm";
@@ -255,6 +255,37 @@ export default function BlogPage(): JSX.Element {
         }
     };
 
+    const handleEditComment = async (commentId: string, content: string, image?: string | null): Promise<void> => {
+    try {
+        const { data, error } = await supabase
+        .from('comments')
+        .update({
+            user_id: user?.id,
+            post_id: selectedBlog?.id,
+            content,
+            image: image || null,
+        })
+        .eq('id', commentId)
+        .select()
+        .single();
+
+        if (error) throw error;
+
+        const formattedComment: Comment = {
+            ...data,
+            date: new Date(data.created_at),
+        };
+
+        dispatch(updateComment(formattedComment)); // You'll need to add this action
+        // toast.success("Comment updated!"); // If using toast
+        
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to update comment';
+        dispatch(setBlogError(errorMessage));
+        // toast.error("Failed to update comment"); // If using toast
+    }
+    };
+
     const handleDeleteComment = async (commentId: string): Promise<void> => {
         try {
             const { error } = await supabase
@@ -364,6 +395,7 @@ export default function BlogPage(): JSX.Element {
                             }))}
                             currentUserId={user?.id}
                             onAddComment={(content, image) => handleAddComment(selectedBlog.id, content, image)}
+                            onEditComment={handleEditComment}
                             onDeleteComment={handleDeleteComment}
                         />
                     </div>

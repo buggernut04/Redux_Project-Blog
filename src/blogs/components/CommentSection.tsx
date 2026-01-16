@@ -4,7 +4,7 @@ import CommentForm from "./CommentForm";
 import Comment from "./Comment";
 import { Separator } from "../../style/ui/separator";
 
-export default function CommentSection({ postId, comments, currentUserId, onAddComment, onDeleteComment }: {
+export default function CommentSection({ postId, comments, currentUserId, onAddComment, onEditComment, onDeleteComment }: {
   postId: string;
   comments: Array<{
     id: string;
@@ -17,6 +17,7 @@ export default function CommentSection({ postId, comments, currentUserId, onAddC
   }>;
   currentUserId?: string;
   onAddComment: (content: string, image?: string | null) => void;
+  onEditComment: (commentId: string, content: string, image?: string | null) => void;
   onDeleteComment: (commentId: string) => void;
 }): JSX.Element {
   const postComments = comments.filter((comment) => comment.post_id === postId);
@@ -43,7 +44,9 @@ export default function CommentSection({ postId, comments, currentUserId, onAddC
             <Comment
               key={comment.id}
               comment={comment}
+              onEdit={(content, image) => onEditComment(comment.id, content, image)}
               onDelete={() => onDeleteComment(comment.id)}
+              canEdit={currentUserId === comment.user_id}
               canDelete={currentUserId === comment.user_id}
             />
           ))}

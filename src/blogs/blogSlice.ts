@@ -50,6 +50,12 @@ const blogSlice = createSlice ({
         addComment: (state, action: PayloadAction<Comment>) => {
             state.comments.unshift(action.payload);
         },
+        updateComment: (state, action: PayloadAction<Comment>) => {
+            const index = state.comments.findIndex(comment => comment.id === action.payload.id);
+            if (index !== -1) {
+                state.comments[index] = action.payload;
+            }
+        },
         deleteComment: (state, action: PayloadAction<string>) => {
             state.comments = state.comments.filter(comment => comment.id !== action.payload);
         },
@@ -94,6 +100,7 @@ export const {
     deleteBlog,
     setComments,
     addComment,
+    updateComment,
     deleteComment,
     setSearchQuery,
     setSelectedCategory,
