@@ -1,5 +1,5 @@
-import { JSX, useState } from "react";
-import { Image as ImageIcon, Send, X } from "lucide-react";
+import { JSX, useRef, useState } from "react";
+import { Image as ImageIcon, Send } from "lucide-react";
 import { Button } from "../../style/ui/button";
 import { Textarea } from "../../style/ui/textarea";
 import { Input } from "../../style/ui/input";
@@ -7,20 +7,19 @@ import { Label } from "../../style/ui/label";
 import { Card, CardContent } from "../../style/ui/card";
 import { supabase } from "../../supabase-client";
 
-
 export default function CommentForm({ onSubmit, disabled = false }: {
   onSubmit: (content: string, image?: string | null) => void;
   disabled?: boolean;
 }): JSX.Element {
     const [content, setContent] = useState("");
-    const [image, setImage] = useState("");
-    const [showImageInput, setShowImageInput] = useState(false);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const fileInputRef = useRef(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
-            setImage(e.target.value);
             setUploadedFile(e.target.files?.[0]);
+            setImageUrl(URL.createObjectURL(e.target.files[0]));
         }
     };
 
@@ -69,13 +68,16 @@ export default function CommentForm({ onSubmit, disabled = false }: {
 
         onSubmit(content, finalImage);
         setContent("");
-        setImage("");
-        setShowImageInput(false);
-    };
+        setUploadedFile(null);
+        setImageUrl("");
 
-    const handleRemoveImage = () => {
-        setImage("");
-        setShowImageInput(false);
+        if (fileInputRef.current) {
+            (fileInputRef.current as HTMLInputElement).value = "";
+        }
+
+        
+        
+        console.log('Comment submitted with image:', finalImage);
     };
 
     return (
@@ -91,11 +93,9 @@ export default function CommentForm({ onSubmit, disabled = false }: {
                 onChange={(e) => setContent(e.target.value)}
                 rows={3}
                 disabled={disabled}
-                required
                 />
             </div>
 
-            {showImageInput && (
                 <div className="space-y-2">
                 <Label htmlFor="commentImage">Image URL (optional)</Label>
                 <div className="flex gap-2">
@@ -106,36 +106,18 @@ export default function CommentForm({ onSubmit, disabled = false }: {
                         type="file"
                         accept="image/*"
                         placeholder="https://example.com/image.jpg"
-                        value={image}
+                        ref={fileInputRef}
                         onChange={handleFileChange}
                         className="pl-10"
                     />
+                    {imageUrl && <img src={imageUrl} alt="Preview" />}
                     </div>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={handleRemoveImage}
-                        >
-                        <X className="size-4" />
-                    </Button>
                 </div>
                 </div>
-            )}
 
             <div className="flex items-center justify-between">
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowImageInput(!showImageInput)}
-                    disabled={disabled}
-                >
-                <ImageIcon className="size-4 mr-2" />
-                    {showImageInput ? "Hide Image Input" : "Add Image"}
-                </Button>
 
-                <Button type="submit" disabled={disabled || !content.trim()}>
+                <Button type="submit" disabled={!content.trim() && uploadedFile === null}>
                 <Send className="size-4 mr-2" />
                     Post Comment
                 </Button>

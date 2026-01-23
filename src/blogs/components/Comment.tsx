@@ -28,10 +28,10 @@ export default function Comment({ comment, onEdit, onDelete, canEdit = false, ca
   const [editImage, setEditImage] = useState(comment.image || "");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showImageInput, setShowImageInput] = useState(!!comment.image);
-
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files?.[0]) {
-          setEditImage(e.target.value);
+          setEditImage(URL.createObjectURL(e.target.files[0]));
           setUploadedFile(e.target.files?.[0]);
       }
   };
@@ -81,6 +81,7 @@ export default function Comment({ comment, onEdit, onDelete, canEdit = false, ca
 
       onEdit(editContent, finalImage);
       setIsEditing(false);
+
     }
   };
 
@@ -118,7 +119,7 @@ export default function Comment({ comment, onEdit, onDelete, canEdit = false, ca
                 variant="default"
                 size="sm"
                 onClick={handleSaveEdit}
-                disabled={!editContent.trim()}
+                disabled={!editContent.trim() && uploadedFile === null}
               >
                 <Check className="size-4 mr-1" />
                 Save
@@ -147,7 +148,6 @@ export default function Comment({ comment, onEdit, onDelete, canEdit = false, ca
                   type="file"
                   accept="image/*"
                   placeholder="https://example.com/image.jpg"
-                  value={editImage}
                   onChange={handleFileChange}
                 />
                 <Button
@@ -161,7 +161,10 @@ export default function Comment({ comment, onEdit, onDelete, canEdit = false, ca
                 >
                   <X className="size-4" />
                 </Button>
+
               </div>
+
+               {editImage && <img src={editImage} alt="Preview" />}
             </div>
           )}
 
