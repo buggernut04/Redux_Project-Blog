@@ -10,13 +10,14 @@ import { Input } from "../../style/ui/input";
 import { supabase } from "../../supabase-client";
 
 export default function CreateBlogForm({ onSubmit, onCancel, initialData, isEdit = false }: {
-  onSubmit: (blog: {
-    title: string;
-    excerpt: string;
-    content: string;
-    category: string;
-    tags: string[];
-    image: string;
+  onSubmit: (
+    blog: {
+      title: string;
+      excerpt: string;
+      content: string;
+      category: string;
+      tags: string[];
+      image: string;
   }) => void;
   onCancel: () => void;
   initialData?: {

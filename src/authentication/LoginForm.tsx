@@ -10,12 +10,10 @@ import { RootState } from "../app/types";
 import { clearError, setError, setLoading } from "./authSlice";
 import { supabase } from "../supabase-client";
 
-interface LoginFormProps {
+export function LoginForm({ onSuccess, onSwitchToSignup }: {
   onSuccess: () => void;
   onSwitchToSignup: () => void;
-}
-
-export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps): JSX.Element {
+}): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [ isLogin, setIsLogin ] = useState<boolean>(true);

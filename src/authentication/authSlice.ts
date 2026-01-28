@@ -1,5 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthState } from "../app/types"
+import { User } from "@supabase/supabase-js";
+
 const authSlice = createSlice({
     name: "auth",
     initialState: {
@@ -8,15 +10,15 @@ const authSlice = createSlice({
         error: null,
     } as AuthState,
     reducers: {
-        setUser(state, action) {
+        setUser(state, action: PayloadAction<User | null>) {
             state.user = action.payload;
             state.loading = false;
             state.error = null;
         },
-        setLoading(state, action) {
+        setLoading(state, action: PayloadAction<boolean>) {
             state.loading = action.payload;
         },
-        setError(state, action) {
+        setError(state, action: PayloadAction<string | null>) {
             state.error = action.payload;
             state.loading = false;
         },

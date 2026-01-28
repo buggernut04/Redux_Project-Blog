@@ -32,7 +32,7 @@ export default function BlogPage(): JSX.Element {
         searchQuery,
         selectedCategory,
         currentPage
-    } = useSelector((state: RootState) => state.blog);
+    } = useSelector((state: RootState) => state.blogs);
 
     const [view, setView] = useState<'list' | 'detail' | 'create' | 'edit'>('list');
     const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
@@ -44,6 +44,7 @@ export default function BlogPage(): JSX.Element {
     const fetchBlogs = async (): Promise<void> => {
         try {
             dispatch(setBlogLoading(true));
+
             const { data, error } = await supabase
                 .from('blogs')
                 .select('*')
@@ -67,13 +68,14 @@ export default function BlogPage(): JSX.Element {
         }
     };
 
-    const handleCreateBlog = async (blogData: {
-        title: string;
-        excerpt: string;
-        content: string;
-        category: string;
-        tags: string[];
-        image: string | File;
+    const handleCreateBlog = async (
+        blogData: {
+            title: string;
+            excerpt: string;
+            content: string;
+            category: string;
+            tags: string[];
+            image: string | File;
     }): Promise<void> => {
         try {
             dispatch(setBlogLoading(true));

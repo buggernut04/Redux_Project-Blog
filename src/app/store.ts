@@ -2,7 +2,7 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit"
 import { authReducer } from "../authentication/authSlice";
 import { blogReducer } from "../blogs/blogSlice"; 
 
-const rootReducer = combineSlices({ auth: authReducer, blog: blogReducer });
+const rootReducer = combineSlices({ auth: authReducer, blogs: blogReducer });
 
 export const store = configureStore({
     reducer: rootReducer,

@@ -20,6 +20,7 @@ export interface Blog {
   tags: string[];
 }
 
+// Comment interface representing a comment on a blog post
 export interface Comment {
   id: string;
   user_id: string;

@@ -10,12 +10,10 @@ import { RootState } from "../app/types";
 import { clearError, setError, setLoading } from "./authSlice";
 import { supabase } from "../supabase-client";
 
-interface RegisterFormProps {
+export function SignUpForm({ onSuccess, onSwitchToLogin }: {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
-}
-
-export function SignUpForm({ onSuccess, onSwitchToLogin }: RegisterFormProps): JSX.Element {
+}): JSX.Element {
     const dispatch = useDispatch<AppDispatch>();
     const { loading, error } = useSelector((state: RootState) => state.auth);
     const [name, setName] = useState("");

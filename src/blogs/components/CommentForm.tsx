@@ -75,9 +75,7 @@ export default function CommentForm({ onSubmit, disabled = false }: {
             (fileInputRef.current as HTMLInputElement).value = "";
         }
 
-        
-        
-        console.log('Comment submitted with image:', finalImage);
+        //console.log('Comment submitted with image:', finalImage);
     };
 
     return (
